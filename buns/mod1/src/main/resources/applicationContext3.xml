@@ -4,19 +4,7 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
 
+    <context:component-scan base-package="mod1"/>
     <context:property-placeholder location="classpath:myApp.properties"/>
-
-    <bean id="myPet"
-          class = "mod1.Cat">
-    </bean>
-
-    <bean id="myPerson"
-          class="mod1.Person">
-<!--        <constructor-arg ref="myPet"/>-->
-        <property name="pet" ref="myPet"/>
-
-        <property name="surname" value="${person.surname}"/>
-        <property name="age" value="${person.age}"/>
-    </bean>
 
 </beans>
