@@ -16,7 +16,7 @@ public class User implements Serializable {
     }
 
     public String toString() {
-        return "Пользователь: " + username
+        return "\nПользователь: " + username
                 + " с логином: " + nickname
                 + ". Его возраст: " + age
                 + ". Все хобби: \n" + String.join("\n", hobbies).replaceAll(" ", "");

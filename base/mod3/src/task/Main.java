@@ -27,6 +27,7 @@ public class Main {
             ObjectOutputStream oos = new ObjectOutputStream(fos);
 
             oos.writeObject(user);
+            System.out.println("\nОбъект сериализован в file.txt...");
 
             oos.close();
         } catch (IOException e) {
@@ -38,6 +39,7 @@ public class Main {
             ObjectInputStream ois = new ObjectInputStream(fis);
             User outputText = (User) ois.readObject();
             System.out.println(outputText);
+            System.out.println("\nОбъект успешно десериализован.");
 
             ois.close();
         } catch (IOException | ClassNotFoundException e) {
