@@ -2,7 +2,6 @@ package task;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class DB {
     private final String HOST = "localhost";
@@ -21,44 +20,40 @@ public class DB {
         return dbConnection;
     }
 
+    private ResultSet statementToCreate(String query) throws SQLException, ClassNotFoundException {
+        Statement statement = getDbConnection().createStatement();
+
+        return statement.executeQuery(query);
+    }
+
     public void insertToOrders() throws ClassNotFoundException, SQLException {
         ArrayList<Integer> usersIDs = new ArrayList<>();
-        String usersSelection = "SELECT * FROM users WHERE `login` = 'john'";
-
-        Statement usersStatement = getDbConnection().createStatement();
-        ResultSet res = usersStatement.executeQuery(usersSelection);
-
-        while (res.next()) {
-            usersIDs.add(res.getInt("id"));
-        }
-
         ArrayList<Integer> itemsIDs = new ArrayList<>();
-        String itemsSelection = "SELECT * FROM items WHERE `category` = 'hats'";
 
-        Statement itemsStatement = getDbConnection().createStatement();
-        ResultSet res2 = itemsStatement.executeQuery(itemsSelection);
+        ResultSet userSelection = statementToCreate("SELECT * FROM users WHERE `login` = 'john'");
 
-        while (res2.next()) {
-            itemsIDs.add(res2.getInt("id"));
+        while (userSelection.next()) {
+            usersIDs.add(userSelection.getInt("id"));
         }
 
-        Object[] usersIDsList = usersIDs.toArray();
-        Object[] itemsIDsList = itemsIDs.toArray();
+        ResultSet itemSelection = statementToCreate("SELECT * FROM items WHERE `category` = 'hats'");
+
+        while (itemSelection.next()) {
+            itemsIDs.add(itemSelection.getInt("id"));
+        }
 
 
-        if (usersIDsList.length < itemsIDsList.length) {
-            for (int i = 1; i < itemsIDsList.length; i++) {
-                usersIDs.add((int) usersIDsList[usersIDsList.length - 1]);
+        if (usersIDs.size() < itemsIDs.size()) {
+            for (int i = 1; i < itemsIDs.size(); i++) {
+                usersIDs.add(usersIDs.get(usersIDs.size() - 1));
             }
         }
 
-        for (int i = 0; i < itemsIDsList.length; i++) {
-            int currentUserID = (int) usersIDs.get(i);
-            int currentItemID = (int) itemsIDs.get(i);
+        for (int i = 0; i < itemsIDs.size(); i++) {
+            int currentUserID = usersIDs.get(i);
+            int currentItemID = itemsIDs.get(i);
 
-            String sql = "INSERT INTO `orders` (user_id, item_id) VALUES (?, ?)";
-
-            PreparedStatement prSt = getDbConnection().prepareStatement(sql);
+            PreparedStatement prSt = getDbConnection().prepareStatement("INSERT INTO `orders` (user_id, item_id) VALUES (?, ?)");
             prSt.setInt(1, currentUserID);
             prSt.setInt(2, currentItemID);
 
@@ -67,56 +62,35 @@ public class DB {
     }
 
     public void getOrders() throws ClassNotFoundException, SQLException {
-        String sql = "SELECT * FROM `orders`";
-        Statement statement = getDbConnection().createStatement();
-        ResultSet res = statement.executeQuery(sql);
-
         ArrayList<Integer> usersInOrders = new ArrayList<>();
         ArrayList<Integer> itemsInOrders = new ArrayList<>();
 
-        while (res.next()) {
-            usersInOrders.add(res.getInt("user_id"));
-            itemsInOrders.add(res.getInt("item_id"));
-        }
+        ResultSet orderSelection = statementToCreate("SELECT * FROM `orders`");
 
-        System.out.println(usersInOrders);
-        System.out.println(itemsInOrders);
+        while (orderSelection.next()) {
+            usersInOrders.add(orderSelection.getInt("user_id"));
+            itemsInOrders.add(orderSelection.getInt("item_id"));
+        }
 
         System.out.println("Все заказы:\n");
 
         for (int i = 0; i < itemsInOrders.size(); i++) {
-            String usersQ = "SELECT login FROM `users` WHERE (?) IN id";
+            PreparedStatement userStatement = getDbConnection().prepareStatement("SELECT login FROM `users` WHERE id = (?)");
+            userStatement.setInt(1, usersInOrders.get(i));
+            ResultSet resultUser = userStatement.executeQuery();
 
-            PreparedStatement prStUser = getDbConnection().prepareStatement(usersQ);
-            prStUser.setInt(1, usersInOrders.get(i));
+            while (resultUser.next()) {
+                System.out.print(resultUser.getString("login") + " – ");
+            }
 
-            prStUser.executeUpdate();
+            PreparedStatement itemStatement = getDbConnection().prepareStatement("SELECT title FROM `items` WHERE id = (?)");
+            itemStatement.setInt(1, itemsInOrders.get(i));
+            ResultSet resultItem = itemStatement.executeQuery();
+
+            while (resultItem.next()) {
+                System.out.println(resultItem.getString("title"));
+            }
 
         }
     }
-
-//        int currentUserID = res.getInt("user_id");
-//
-//        String selectUsers = "SELECT login FROM `users` WHERE id = (?)";
-//
-//        PreparedStatement prStUser = getDbConnection().prepareStatement(selectUsers);
-//        prStUser.setInt(1, currentUserID);
-//
-//        prStUser.executeUpdate();
-
-//        Statement userStatement = getDbConnection().createStatement();
-//        ResultSet userRes = userStatement.executeQuery(selectUsers);
-//
-//        int currentItemID = res.getInt("item_id");
-//
-//        String selectItem = "SELECT login FROM `items` WHERE id = (?)";
-//
-//        PreparedStatement prStItem = getDbConnection().prepareStatement(selectItem);
-//        prStItem.setInt(1, currentItemID);
-//
-//        Statement itemStatement = getDbConnection().createStatement();
-//        ResultSet itemRes = itemStatement.executeQuery(selectItem);
-//
-//        System.out.println(userRes.getString(1));
-//        System.out.println(itemRes.getString(1));
 }

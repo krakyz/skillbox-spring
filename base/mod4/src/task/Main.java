@@ -7,7 +7,7 @@ public class Main {
         DB database = new DB();
 
         try {
-//            database.insertToOrders();
+            database.insertToOrders();
             database.getOrders();
         } catch (ClassNotFoundException | SQLException e) {
             throw new RuntimeException(e);
