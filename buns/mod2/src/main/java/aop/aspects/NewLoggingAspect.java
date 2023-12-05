@@ -18,7 +18,7 @@ public class NewLoggingAspect {
         }
         catch (Exception e) {
             System.out.println("aroundReturnBookLoggingAdvice:      exception was caught – " + e);
-            targetMethodResult = "Unknown book name";
+            throw e;
         }
 
 
